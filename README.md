@@ -1,3 +1,4 @@
 # ProiectPOO
 salut
 Salut!
+Salutare
