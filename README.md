@@ -1,4 +1,1 @@
 # ProiectPOO
-salut
-Salut!
-Salutare
