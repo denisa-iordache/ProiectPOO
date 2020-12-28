@@ -1,0 +1,1403 @@
+#include <iostream>
+#include<string>
+#include <algorithm>
+#include <regex>
+#pragma warning(disable : 4996)
+#define OUT 0  
+#define IN 1  
+using namespace std;
+
+typedef enum 
+{
+	CREATE_TAB = 0, DROP = 1, DISPLAY = 2, INSERT = 3,
+	SELECT = 4, UPDATE = 5, DELETE = 6, CREATE_INDX = 7, DROP_INDX = 8, NECUNOSCUT = -1
+} Functie;
+
+class Coloana
+{
+private:
+	friend class Parsing;
+	friend class Baza;
+	friend class Rand;
+	friend class Tabela;
+	string nume_coloana;
+	string tip;
+	int dimensiune;
+	char* valoare_implicita;
+public:
+	Coloana() //constructor implicit
+	{
+		nume_coloana = "";
+		tip = "";
+		dimensiune = 0;
+		valoare_implicita = nullptr;
+	}
+
+	Coloana(string n, string t, int d) //constructor cu parametri
+	{
+		nume_coloana = n;
+		tip = t;
+		if (d > 0)
+		{
+			dimensiune = d;
+		}
+		else
+		{
+			dimensiune = 0;
+		}
+	}
+
+	Coloana(string nume_coloana, string tip, int dimensiune, string valoare_implicita) //constructor cu parametri
+	{
+		this->nume_coloana = nume_coloana;
+		this->tip = tip;
+		this->dimensiune = dimensiune;
+		if (valoare_implicita != "")
+		{
+			this->valoare_implicita = new char[valoare_implicita.length() + 1];
+			strcpy_s(this->valoare_implicita, valoare_implicita.length() + 1, valoare_implicita.c_str());
+		}
+	}
+
+	Coloana(const Coloana& c) //constructor de copiere
+	{
+		this->nume_coloana = c.nume_coloana;
+		this->tip = c.tip;
+		this->dimensiune = c.dimensiune;
+		if (c.valoare_implicita != nullptr)
+		{
+			this->valoare_implicita = new char[strlen(c.valoare_implicita) + 1];
+			strcpy_s(this->valoare_implicita, strlen(c.valoare_implicita) + 1, c.valoare_implicita);
+		}
+	}
+
+	~Coloana() //destructor
+	{
+		if (valoare_implicita != nullptr)
+		{
+			delete[] valoare_implicita;
+		}
+	}
+
+	Coloana operator=(const Coloana& c) //operator=
+	{
+		if (valoare_implicita != nullptr)
+		{
+			delete[] valoare_implicita;
+		}
+		this->nume_coloana = c.nume_coloana;
+		this->tip = c.tip;
+		this->dimensiune = c.dimensiune;
+		if (c.valoare_implicita != nullptr)
+		{
+			this->valoare_implicita = new char[strlen(c.valoare_implicita) + 1];
+			strcpy_s(this->valoare_implicita, strlen(c.valoare_implicita) + 1, c.valoare_implicita);
+		}
+		return *this;
+	}
+
+	char& operator[](int index) //operatorul pentru indexare
+	{
+		if (index >= 0 && index < strlen(valoare_implicita))
+		{
+			return valoare_implicita[index];
+		}
+		throw exception("index invalid");
+	}
+
+	Coloana operator+(int valoare) //operator+
+	{
+		if (valoare > 0)
+		{
+			Coloana copie = *this;
+			copie.dimensiune += valoare;
+			return copie;
+		}
+		else
+		{
+			throw 1;
+		}
+	}
+
+	Coloana operator++() //operator++ 1)
+	{
+		this->dimensiune++;
+		return *this;
+	}
+
+	Coloana operator++(int i) //operator++ 2)
+	{
+		Coloana copie = *this;
+		this->dimensiune++;
+		return copie;
+	}
+
+	explicit operator int() //operator de cast explicit
+	{
+		return dimensiune;
+	}
+
+	bool operator!() //operator!
+	{
+		return dimensiune > 0;
+	}
+
+	bool operator==(Coloana& c) //operator==
+	{
+		Coloana d = (Coloana&)c;
+		if (this->dimensiune == d.dimensiune)
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+
+	string getnume_coloana()
+	{
+		return nume_coloana;
+	}
+
+	void setnume_coloana(string nume_coloana)
+	{
+		const char* n = nume_coloana.c_str();
+		if (strlen(n) > 0)
+		{
+			this->nume_coloana = nume_coloana;
+		}
+		else
+			nume_coloana = "";
+	}
+
+	string gettip()
+	{
+		return tip;
+	}
+
+	void settip(string tip)
+	{
+		const char* t = tip.c_str();
+		if (strlen(t) > 0)
+		{
+			this->tip = tip;
+		}
+		else
+			tip = "";
+	}
+
+	int getdimensiune()
+	{
+		return dimensiune;
+	}
+
+	void setdimensiune(int dimensiune)
+	{
+		if (dimensiune > 0)
+		{
+			this->dimensiune = dimensiune;
+		}
+	}
+
+	char* getvaloare_implicita()
+	{
+		if (valoare_implicita != nullptr)
+		{
+			char* k = new char[strlen(this->valoare_implicita) + 1];
+			strcpy_s(k, strlen(this->valoare_implicita) + 1, this->valoare_implicita);
+			return k;
+		}
+		return nullptr;
+	}
+
+	void setvaloare_implicita(const char* valoare_implicita)
+	{
+
+		this->valoare_implicita = new char[strlen(valoare_implicita) + 1];
+		strcpy_s(this->valoare_implicita, strlen(valoare_implicita) + 1, valoare_implicita);
+	}
+
+	friend ostream& operator<<(ostream&, Coloana);
+	friend istream& operator>>(istream&, Coloana&);
+
+};
+
+ostream& operator<<(ostream& out, Coloana c)
+{
+	out << "nume coloana: " << c.nume_coloana << endl;
+	out << "tip: " << c.tip << endl;
+	out << "dimensiune: " << c.dimensiune << endl;
+	out << "valoare implicita: ";
+	if (c.valoare_implicita != nullptr)
+	{
+		out << c.valoare_implicita;
+	}
+	out << endl;
+	return out;
+}
+
+istream& operator>>(istream& in, Coloana& c)
+{
+	cout << "nume coloana = ";
+	in >> ws;
+	getline(in, c.nume_coloana);
+	cout << "tip = ";
+	in >> ws;
+	getline(in, c.tip);
+	cout << "dimensiune = ";
+	in >> c.dimensiune;
+	char buffer[100];
+	cout << "valoare implicita: ";
+	in >> ws;
+	in.getline(buffer, 99);
+	if (c.valoare_implicita != nullptr)
+	{
+		delete[] c.valoare_implicita;
+	}
+	c.valoare_implicita = new char[strlen(buffer) + 1];
+	strcpy_s(c.valoare_implicita, strlen(buffer) + 1, buffer);
+	return in;
+}
+
+class Rand
+{
+private:
+	friend class Parsing;
+	friend class Baza;
+	friend class Coloana;
+	friend class Tabela;
+	Coloana* rand; //Un rand reprezinta un vector de coloane
+	int nr_coloane;
+public:
+	Rand() //constructor implicit
+	{
+		nr_coloane = 0;
+		rand = nullptr;
+	}
+
+	Rand(int n) //constructor cu parametri
+	{
+		if (n > 0)
+		{
+			nr_coloane=n;
+		}
+		else
+		{
+			n = 0;
+		}
+	}
+
+	Rand(int nr_coloane, Coloana* rand) //constructor cu parametri
+	{
+		if (rand != nullptr && nr_coloane > 0)
+		{
+			this->nr_coloane = nr_coloane;
+			this->rand = new Coloana[nr_coloane];
+			for (int i = 0; i < nr_coloane; i++)
+			{
+				this->rand[i] = rand[i];
+			}
+		}
+	}
+
+	Rand(const Rand& r) //constructor de copiere
+	{
+		if (r.rand != nullptr && r.nr_coloane > 0)
+		{
+			this->nr_coloane = r.nr_coloane;
+			this->rand = new Coloana[r.nr_coloane];
+			for (int i = 0; i < r.nr_coloane; i++)
+			{
+				this->rand[i] = r.rand[i];
+			}
+		}
+	}
+
+	~Rand()
+	{
+		if (rand != nullptr)
+		{
+			delete[] rand;
+		}
+	}
+
+	Rand& operator=(const Rand& r) //operator=
+	{
+		if (rand != nullptr)
+		{
+			delete[] rand;
+		}
+		if (r.rand != nullptr && r.nr_coloane > 0)
+		{
+			this->nr_coloane = r.nr_coloane;
+			this->rand = new Coloana[r.nr_coloane];
+			for (int i = 0; i < r.nr_coloane; i++)
+			{
+				this->rand[i] = r.rand[i];
+			}
+		}
+		return *this;
+	}
+
+	Coloana& operator[](int index) //operatorul pentru indexare
+	{
+		if (index >= 0 && index < nr_coloane)
+		{
+			return rand[index];
+		}
+		throw exception("index invalid");
+	}
+
+	Rand operator+(int valoare) //operator+
+	{
+		if (valoare > 0)
+		{
+			Rand copie = *this;
+			copie.nr_coloane += valoare;
+			return copie;
+		}
+		else
+		{
+			throw 1;
+		}
+	}
+
+	Rand operator++() //operator++ 1)
+	{
+		this->nr_coloane++;
+		return *this;
+	}
+
+	Rand operator++(int i) //operator++ 2)
+	{
+		Rand copie = *this;
+		this->nr_coloane++;
+		return copie;
+	}
+
+	explicit operator int() //operator de cast explicit
+	{
+		return nr_coloane;
+	}
+
+	bool operator!() //operator!
+	{
+		return nr_coloane > 0;
+	}
+
+	bool operator==(Rand& r) //operator==
+	{
+		Rand d = (Rand&)r;
+		if (this->nr_coloane == d.nr_coloane)
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+
+	int getnr_coloane()
+	{
+		return nr_coloane;
+	}
+
+	void setnrcoloane(int nr_coloane)
+	{
+		if (nr_coloane > 0)
+		{
+			this->nr_coloane = nr_coloane;
+		}
+		else
+		{
+			nr_coloane = 0;
+		}
+	}
+
+	Coloana* getrand()
+	{
+		if (rand != nullptr && nr_coloane > 0)
+		{
+			Coloana* copie = new Coloana[nr_coloane];
+			for (int i = 0; i < nr_coloane; i++)
+			{
+				copie[i] = rand[i];
+			}
+			return copie;
+		}
+		return nullptr;
+	}
+
+	void setrand(Coloana* rand, int nr_coloane)
+	{
+		if (rand != nullptr && nr_coloane > 0)
+		{
+			if (this->rand != nullptr)
+			{
+				delete[] this->rand;
+			}
+			this->rand = new Coloana[nr_coloane];
+			for (int i = 0; i < nr_coloane; i++)
+			{
+				this->rand[i] = rand[i];
+			}
+			this->nr_coloane = nr_coloane;
+		}
+	}
+
+	friend ostream& operator<<(ostream&, Rand);
+	friend istream& operator>>(istream&, Rand&);
+};
+
+ostream& operator<<(ostream& out, Rand r)
+{
+	out << "numar coloane: " << r.nr_coloane << endl;
+	out << "randuri: ";
+	if (r.rand != nullptr)
+	{
+		for (int i = 0; i < r.nr_coloane; i++)
+		{
+			out << r.rand[i] << " ";
+		}
+	}
+	return out;
+}
+
+istream& operator>>(istream& in, Rand& r)
+{
+	cout << "numar coloane = ";
+	in >> r.nr_coloane;
+	if (r.rand != nullptr)
+	{
+		delete[] r.rand;
+	}
+	if (r.nr_coloane > 0)
+	{
+		r.rand = new Coloana[r.nr_coloane];
+		for (int i = 0; i < r.nr_coloane; i++)
+		{
+			cout << "rand[" << i << "] = ";
+			in >> r.rand[i];
+		}
+	}
+	else
+	{
+		r.nr_coloane = 0;
+		r.rand = nullptr;
+	}
+	return in;
+}
+
+class Tabela
+{
+private:
+	friend class Parsing;
+	friend class Baza;
+	friend class Coloana;
+	friend class Rand;
+	Rand* tabela; //O tabela reprezinta un vector de randuri
+	static int nr_randuri;
+	string nume_tabela;
+	const int id_rand;
+
+public:
+	Tabela() : id_rand(++nr_randuri)//constructor implicit
+	{
+		nume_tabela = "";
+		tabela = nullptr;
+	}
+
+	Tabela(string nume_tabela) : id_rand(++nr_randuri)//constructor cu parametri
+	{
+		if (nume_tabela != "")
+		{
+			this->nume_tabela = nume_tabela;
+		}
+		else
+		{
+			nume_tabela = "";
+		}
+	}
+
+	Tabela(Rand* tabela, string nume_tabela) : id_rand(++nr_randuri)//constructor cu parametri
+	{
+		this->nume_tabela = nume_tabela;
+		if (tabela != nullptr && nr_randuri > 0)
+		{
+			this->tabela = new Rand[nr_randuri];
+			for (int i = 0; i < nr_randuri; i++)
+			{
+				this->tabela[i] = tabela[i];
+			}
+		}
+		else {
+			this->tabela = nullptr;
+			this->nr_randuri = 0;
+		}
+	}
+
+	Tabela(const Tabela& t) : id_rand(++nr_randuri)//constructor de copiere
+	{
+		this->nume_tabela = t.nume_tabela;
+		if (t.tabela != nullptr && t.nr_randuri > 0)
+		{
+			this->tabela = new Rand[t.nr_randuri];
+			for (int i = 0; i < t.nr_randuri; i++)
+			{
+				this->tabela[i] = t.tabela[i];
+			}
+		}
+		else 
+		{
+			this->tabela = nullptr;
+		}
+	}
+
+	~Tabela()
+	{
+		if (tabela != nullptr)
+		{
+			delete[] tabela;
+		}
+	}
+
+	Tabela& operator=(const Tabela& t)
+	{
+		if (tabela != nullptr)
+		{
+			delete[] tabela;
+		}
+		this->nume_tabela = t.nume_tabela;
+		if (t.tabela != nullptr && t.nr_randuri > 0)
+		{
+			this->tabela = new Rand[t.nr_randuri];
+			for (int i = 0; i < t.nr_randuri; i++)
+			{
+				this->tabela[i] = t.tabela[i];
+			}
+		}
+		else
+		{
+			this->tabela = nullptr;
+		}
+		return *this;
+	}
+
+	Rand& operator[](int index) //operatorul pentru indexare
+	{
+		if (index >= 0 && index < nr_randuri)
+		{
+			return tabela[index];
+		}
+		throw exception("index invalid");
+	}
+
+	Tabela operator+(int valoare) //operator+
+	{
+		if (valoare > 0)
+		{
+			Tabela copie = *this;
+			copie.nr_randuri += valoare;
+			return copie;
+		}
+		else
+		{
+			throw 1;
+		}
+	}
+
+	Tabela operator++() //operator++ 1)
+	{
+		this->nr_randuri++;
+		return *this;
+	}
+
+	Tabela operator++(int i) //operator++ 2)
+	{
+		Tabela copie = *this;
+		this->nr_randuri++;
+		return copie;
+	}
+
+	explicit operator int() //operator de cast explicit
+	{
+		return nr_randuri;
+	}
+
+	bool operator!() //operator!
+	{
+		return nr_randuri > 0;
+	}
+
+	bool operator==(Tabela& c) //operator==
+	{
+		Tabela d = (Tabela&)c;
+		if (this->nr_randuri == d.nr_randuri)
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+
+	int getnr_randuri()
+	{
+		return nr_randuri;
+	}
+
+	void setnr_randuri(int nr_randuri)
+	{
+		this->nr_randuri = nr_randuri;
+	}
+
+	string getnume_tabela()
+	{
+		return nume_tabela;
+	}
+
+	void setnume_tabela(string nume_tabela)
+	{
+		const char* t = nume_tabela.c_str();
+		if (strlen(t) > 0)
+		{
+			this->nume_tabela = nume_tabela;
+		}
+		else
+			nume_tabela = "";
+	}
+
+	Rand* gettabela()
+	{
+		if (tabela != nullptr && nr_randuri > 0)
+		{
+			Rand* copie = new Rand[nr_randuri];
+			for (int i = 0; i < nr_randuri; i++)
+			{
+				copie[i] = tabela[i];
+			}
+			return copie;
+		}
+		return nullptr;
+	}
+
+	void setranduri(Rand* tabela, int nr_randuri)
+	{
+		if (tabela != nullptr && nr_randuri > 0)
+		{
+			if (this->tabela != nullptr)
+			{
+				delete[] this->tabela;
+			}
+			this->tabela = new Rand[nr_randuri];
+			for (int i = 0; i < nr_randuri; i++)
+			{
+				this->tabela[i] = tabela[i];
+			}
+			this->nr_randuri = nr_randuri;
+		}
+	}
+
+	friend ostream& operator<<(ostream&, Tabela);
+	friend istream& operator>>(istream&, Tabela&);
+
+};
+
+int Tabela::nr_randuri = 0;
+
+ostream& operator<<(ostream& out, Tabela t)
+{
+	out << "nume tabela: " << t.nume_tabela << endl;
+	out << "numar randuri: " << t.nr_randuri << endl;
+	out << "randuri: ";
+	if (t.tabela != nullptr)
+	{
+		for (int i = 0; i < t.nr_randuri; i++)
+		{
+			out << t.tabela[i] << " ";
+		}
+	}
+	return out;
+}
+
+istream& operator>>(istream& in, Tabela& t)
+{
+	cout << "nume tabela = ";
+	in >> ws;
+	getline(in, t.nume_tabela);
+	cout << "numar randuri = ";
+	in >> t.nr_randuri;
+	if (t.tabela != nullptr)
+	{
+		delete[] t.tabela;
+	}
+	if (t.nr_randuri > 0)
+	{
+		t.tabela = new Rand[t.nr_randuri];
+		for (int i = 0; i < t.nr_randuri; i++)
+		{
+			cout << "tabela[" << i << "] = ";
+			in >> t.tabela[i];
+		}
+	}
+	else
+	{
+		t.nr_randuri = 0;
+		t.tabela = nullptr;
+	}
+	return in;
+}
+
+class Baza
+{
+private:
+	friend class Parsing;
+	friend class Tabela;
+	friend class Coloana;
+	friend class Rand;
+	Tabela* baza; //Baza reprezinta un vector de tabele
+	int nr_tabele;
+	string nume_db;
+public:
+	Baza() //constructor implicit
+	{
+		nume_db = "";
+		nr_tabele = 0;
+		baza = nullptr;
+	}
+
+	Baza(int t) //constructor cu parametri
+	{
+		if (t > 0)
+		{
+			nr_tabele = t;
+		}
+		else
+		{
+			t = 0;
+		}
+	}
+
+	Baza(int nr_tabele, Tabela* tabele, string nume_db) //constructor cu parametri
+	{
+		this->nume_db = nume_db;
+		if (tabele != nullptr && nr_tabele > 0)
+		{
+			this->nr_tabele = nr_tabele;
+			this->baza = new Tabela[nr_tabele];
+			for (int i = 0; i < nr_tabele; i++)
+			{
+				this->baza[i] = tabele[i];
+			}
+		}
+	}
+
+	Baza(const Baza& b) //constructor de copiere
+	{
+		this->nume_db = b.nume_db;
+		if (b.baza != nullptr && b.nr_tabele > 0)
+		{
+			this->nr_tabele = b.nr_tabele;
+			this->baza = new Tabela[b.nr_tabele];
+			for (int i = 0; i < b.nr_tabele; i++)
+			{
+				this->baza[i] = b.baza[i];
+			}
+		}
+	}
+
+	~Baza() //destructor
+	{
+		if (baza != nullptr)
+		{
+			delete[] baza;
+		}
+	}
+
+	Baza& operator=(const Baza& b) //operator=
+	{
+		if (baza != nullptr)
+		{
+			delete[] baza;
+		}
+		this->nume_db = b.nume_db;
+		if (b.baza != nullptr && b.nr_tabele > 0)
+		{
+			this->nr_tabele = b.nr_tabele;
+			this->baza = new Tabela[b.nr_tabele];
+			for (int i = 0; i < b.nr_tabele; i++)
+			{
+				this->baza[i] = b.baza[i];
+			}
+		}
+		return *this;
+	}
+
+	Tabela& operator[](int index) //operatorul pentru indexare
+	{
+		if (index >= 0 && index < nr_tabele)
+		{
+			return baza[index];
+		}
+		throw exception("index invalid");
+	}
+	
+
+Baza operator+(int valoare) //operator+
+{
+	if (valoare > 0)
+	{
+		Baza copie = *this;
+		copie.nr_tabele += valoare;
+		return copie;
+	}
+	else
+	{
+		throw 1;
+	}
+}
+
+Baza operator++() //operator++ 1)
+{
+	this->nr_tabele++;
+	return *this;
+}
+
+Baza operator++(int i) //operator++ 2)
+{
+	Baza copie = *this;
+	this->nr_tabele++;
+	return copie;
+}
+
+explicit operator int() //operator de cast explicit
+{
+	return nr_tabele;
+}
+
+bool operator!() //operator!
+{
+	return nr_tabele > 0;
+}
+
+bool operator==(Baza& b) //operator==
+{
+	Baza d = (Baza&)b;
+	if (this->nr_tabele == d.nr_tabele)
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
+	int getnr_tabele()
+	{
+		return nr_tabele;
+	}
+
+	void setnr_tabele(int nr_tabele)
+	{
+		if (nr_tabele > 0)
+		{
+			this->nr_tabele = nr_tabele;
+		}
+		else
+		{
+			nr_tabele = 0;
+		}
+	}
+
+	string getnume_db()
+	{
+		return nume_db;
+	}
+
+	void setnume_db(string nume_db)
+	{
+		const char* n = nume_db.c_str();
+		if (strlen(n) > 0)
+		{
+			this->nume_db = nume_db;
+		}
+		else
+			nume_db = "";
+	}
+
+	Tabela* getbaza()
+	{
+		if (baza != nullptr && nr_tabele > 0)
+		{
+			Tabela* copie = new Tabela[nr_tabele];
+			for (int i = 0; i < nr_tabele; i++)
+			{
+				copie[i] = baza[i];
+			}
+			return copie;
+		}
+		return nullptr;
+	}
+
+	void setbaza(Tabela* baza, int nr_tabele)
+	{
+		if (baza != nullptr && nr_tabele > 0)
+		{
+			if (this->baza != nullptr)
+			{
+				delete[] this->baza;
+			}
+			this->baza = new Tabela[nr_tabele];
+			for (int i = 0; i < nr_tabele; i++)
+			{
+				this->baza[i] = baza[i];
+			}
+			this->nr_tabele = nr_tabele;
+		}
+	}
+
+	friend ostream& operator<<(ostream&, Baza);
+	friend istream& operator>>(istream&, Baza&);
+};
+
+ostream& operator<<(ostream& out, Baza b)
+{
+	out << "nume baza: " << b.nume_db << endl;
+	out << "numar tabele: " << b.nr_tabele << endl;
+	out << "tabele: ";
+	if (b.baza != nullptr)
+	{
+		for (int i = 0; i < b.nr_tabele; i++)
+		{
+			out << b.baza[i] << " ";
+		}
+	}
+	return out;
+}
+
+istream& operator>>(istream& in, Baza& b)
+{
+	cout << "nume baza = ";
+	in >> ws;
+	getline(in, b.nume_db);
+	cout << "numar tabele = ";
+	in >> b.nr_tabele;
+	if (b.baza != nullptr)
+	{
+		delete[] b.baza;
+	}
+	if (b.nr_tabele > 0)
+	{
+		b.baza = new Tabela[b.nr_tabele];
+		for (int i = 0; i < b.nr_tabele; i++)
+		{
+			cout << "baza[" << i << "] = ";
+			in >> b.baza[i];
+		}
+	}
+	else
+	{
+		b.nr_tabele = 0;
+		b.baza = nullptr;
+	}
+	return in;
+}
+
+class Parsing
+{
+private:
+	friend class Baza;
+	friend class Tabela;
+	friend class Rand;
+	string comanda;
+	int nr_cuvinte;
+	Functie functie;
+	string nume_tabela;
+	Baza b;
+public:
+	Parsing() //constructor implicit
+	{
+		comanda = "";
+		this->functie = Functie(3);
+		nr_cuvinte = 0;
+	}
+
+	Parsing(string comanda, int nr_cuvinte, string nume_tabela, Functie functie) //constructor cu parametri
+	{
+		this->comanda = comanda;
+		this->nr_cuvinte = nr_cuvinte;
+		this->nume_tabela = nume_tabela;
+		this->functie = functie;
+	}
+
+	Parsing(string comanda) //constructor cu parametri
+	{
+		this->functie = Functie(3);
+		this->comanda = comanda;
+		int state = OUT;
+		unsigned wc = 0;
+		for (int i = 0; i < comanda.length(); i++)
+		{
+			if (comanda[i] == ' ' || comanda[i] == '=' || comanda[i] == ',' || comanda[i] == '(' || comanda[i] == ')')
+				state = OUT;
+			else if (state == OUT)
+			{
+				state = IN;
+				++wc;
+			}
+		}
+		this->nr_cuvinte = wc;
+	}
+
+	Parsing(const Parsing& p) //constructor de copiere
+	{
+		this->comanda = p.comanda;
+		this->nr_cuvinte = p.nr_cuvinte;
+		this->nume_tabela = p.nume_tabela;
+		this->functie = p.functie;
+	}
+
+	~Parsing()
+	{
+
+	}
+
+	Parsing& operator=(const Parsing& p)
+	{
+		this->comanda = p.comanda;
+		this->nr_cuvinte = p.nr_cuvinte;
+		this->nume_tabela = p.nume_tabela;
+		this->functie = p.functie;
+		return *this;
+	}
+
+	Parsing operator+(int valoare) //operator+
+	{
+		if (valoare > 0)
+		{
+			Parsing copie = *this;
+			copie.nr_cuvinte += valoare;
+			return copie;
+		}
+		else
+		{
+			throw 1;
+		}
+	}
+
+	Parsing operator++() //operator++ 1)
+	{
+		this->nr_cuvinte++;
+		return *this;
+	}
+
+	Parsing operator++(int i) //operator++ 2)
+	{
+		Parsing copie = *this;
+		this->nr_cuvinte++;
+		return copie;
+	}
+
+	explicit operator int() //operator de cast explicit
+	{
+		return nr_cuvinte;
+	}
+
+	bool operator!() //operator!
+	{
+		return nr_cuvinte > 0;
+	}
+
+	bool operator==(Parsing& p) //operator==
+	{
+		Parsing d = (Parsing&)p;
+		if (this->nr_cuvinte == d.nr_cuvinte)
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+
+	string getcomanda()
+	{
+		return comanda;
+	}
+
+	void setcomanda(string comanda)
+	{
+		const char* c = comanda.c_str();
+		if (strlen(c) > 0)
+		{
+			this->comanda = comanda;
+		}
+		else
+			comanda = "";
+	}
+
+	int getnr_cuvinte()
+	{
+		return nr_cuvinte;
+	}
+
+	void setnr_cuvinte(int nr_cuvinte)
+	{
+		if (nr_cuvinte > 0)
+		{
+			this->nr_cuvinte = nr_cuvinte;
+		}
+		else
+		{
+			nr_cuvinte = 0;
+		}
+	}
+
+	string getnume_tabela()
+	{
+		return nume_tabela;
+	}
+
+	void setnume_tabela(string nume_tabela)
+	{
+		const char* t = nume_tabela.c_str();
+		if (strlen(t) > 0)
+		{
+			this->nume_tabela = nume_tabela;
+		}
+		else
+			nume_tabela = "";
+	}
+
+	int egalitate(string s1, string s2) {  //pentru a verifica daca o comanda primita este una din cele trei
+		transform(s1.begin(), s1.end(), s1.begin(), ::tolower);   //convertesc s1 si s2 in litere mici
+		transform(s2.begin(), s2.end(), s2.begin(), ::tolower);
+		if (s1.compare(s2) == 0)
+			return 1; //la fel
+		return 0; //diferite
+	}
+
+	bool matchcom() {
+		regex create1("\\s*create\\s+table\\s+\\w+\\s*\\((\\s*\\w+\\s*(,)){3}\\s*\\w+\\s*\\)\\s*", regex_constants::icase);
+		regex drop("\\s*drop\\s+table\\s+\\w+\\s*", regex_constants::icase);
+		regex display("\\s*display\\s+table\\s+\\w+\\s*", regex_constants::icase);
+		regex create2("\\s*create\\s+table\\s+\\w+\\s*\\(\\s*((\\s*(\\(){1}\\s*\\w+\\s*(?:,\\s*\\w+\\s*){3})\\s*\\)\\s*,\\s*){1,19}((\\s*(\\(){1}\\s*\\w+\\s*(?:,\\s*\\w+\\s*){3})\\s*\\)\\s*)\\)\\s*", regex_constants::icase);
+		regex insert("\\s*(insert)(\\s+)(into)(\\s+)(\\w+)(\\s+)(values)\\s*((\\s*(\\()\\s*([0-9]+|[a-z_]+)\\s*(?:,\\s*([0-9]+|[a-z_]+)\\s*){0,19})\\s*\\)\\s*)", regex_constants::icase);
+		regex select("\\s*select\\s*(((\\s*\\(\\s*\\w+\\s*(?:,\\s*\\w+\\s*){0,19})\\s*\\)\\s*)|all)\\s*from\\s*\\w+\\s*(where\\s*\\w+\\s*=\\s*\\s*([0-9]+|[a-z_]+)\\s*)?", regex_constants::icase);
+		regex update("\\s*update\\s+\\w+\\s+set\\s+\\w+\\s*=\\s*([0-9]+|[a-z_]+)\\s+where\\s+\\w+\\s*=\\s*([0-9]+|[a-z_]+)\\s*", regex_constants::icase);
+		regex delete_from("\\s*delete\\s+from\\s+\\w+\\s+where\\s+\\w+\\s*=\\s*([0-9]+|[a-z_]+)\\s*", regex_constants::icase);
+		regex create_indx("\\s*create\\s+index\\s+(\\s*if\\s+not\\s+exists\\s+)?\\w+\\s+on\\s+\\w+\\s*\\(\\s*\\w+\\s*\\)\\s*", regex_constants::icase);
+		regex drop_indx("\\s*drop\\s+index\\s+\\w+\\s*", regex_constants::icase);
+		bool match = false; functie = Functie(-1); string* cuvinte = fiecare_cuvant();
+		if (regex_match(comanda, create2) || regex_match(comanda, create1))
+		{
+			functie = Functie(0);   match = true;
+		}
+		if (regex_match(comanda, drop))
+		{
+			functie = Functie(1); match = true;
+		}
+		if (regex_match(comanda, display))
+		{
+			functie = Functie(2);	match = true;
+		}
+		if (regex_match(comanda, insert))
+		{
+			functie = Functie(3); match = true;
+		}
+		if (regex_match(comanda, select))
+		{
+			functie = Functie(4); match = true;
+		}
+		if (regex_match(comanda, update))
+		{
+			functie = Functie(5); match = true;
+		}
+		if (regex_match(comanda, delete_from))
+		{
+			functie = Functie(6); match = true;
+		}
+		if (regex_match(comanda, create_indx))
+		{
+			functie = Functie(7); match = true;
+		}
+		if (regex_match(comanda, drop_indx))
+		{
+			functie = Functie(8); match = true;
+		}
+		cout << (match ? "Comanda corecta. " : "Eroare de sintaxa!") << endl;
+		return match;
+	}
+
+	void set_baza(Baza b) {
+		this->b = b;
+	}
+
+	string* fiecare_cuvant()
+	{
+		string* cuvinte = new string[nr_cuvinte];  //aloc vector de cuvinte regasite in comanda data
+		int i = 0, k = 0, vb = 0;  //contorul cuvintelor 
+		while (i < this->comanda.length())
+		{
+			if (this->comanda[i] == ' ' || this->comanda[i] == '=' || this->comanda[i] == ',' || this->comanda[i] == '(' || this->comanda[i] == ')')
+			{
+				i++;
+				if (vb == 1) k++;
+				vb = 0;
+			}
+			else {
+				cuvinte[k] += this->comanda[i];  vb = 1;
+			}
+			if (vb == 1)  i++;
+		}
+		return cuvinte;
+	}
+	bool check_nume(string expr)
+	{
+		bool flag = false;
+		for (int j = 0; j < b.nr_tabele; j++)
+		{
+			if (expr == b.baza[j].nume_tabela)
+				flag = true;
+			cout << (flag ? "Tabela exista." : "Tabela nu exista!") << endl;
+		}
+		return flag;
+	}
+	bool delimitariCorecte(string exp, int& p, int& v)
+	{
+		bool flag = true;
+		int nr = 0;
+
+		for (int j = 0; j < exp.length(); j++) { //parcurg expresia
+			if (exp[j] == '(') {
+				nr++; p++; // e o paranteza deschisa
+			}
+			else {
+				if (exp[j] == ')')
+					nr--;   // e o paranteza inchisa
+				if (exp[j] == ',') {
+					if (nr == 0) { cout << "Virgula incorecta!" << endl; flag = false; break; }
+					else v++;
+				}
+			}
+			if (nr < 0) { flag = false; break; }
+		}
+		if (nr < 0) {   // Sunt mai multe paranteze inchise
+			flag = false;
+			cout << "Parantezele nu corespund." << endl;
+		}
+		for (int j = 0; j < exp.length() - 1; j++) {
+			if (exp[j] == ',' && exp[j + 1] == ',') //virgule consecutive
+			{
+				cout << "Virgulele sunt consecutive, sintaxa gresita!" << endl;
+				flag = false;
+				break;
+			}
+		}
+		return flag;
+	}
+
+	void INSERT_INTO(string* cuvinte)
+	{
+
+	}
+	void SELECT(string* cuvinte)
+	{
+
+	}
+
+	void UPDATE(string* cuvinte)
+	{
+
+	}
+	void CREATE_INDEX(string* cuvinte)
+	{
+
+	}
+	void DROP_INDEX(string* cuvinte)
+	{
+
+	}
+	void DELETE_FROM(string* cuvinte)
+	{
+
+	}
+	void CREATE_TABLE(string* cuvinte)
+	{
+		if (check_nume(cuvinte[2]) == false)
+		{
+
+		}
+	}
+	void afisare_parametri(int k, int p, string* cuvinte)
+	{
+		for (int i = 0; i < p - 1; i++) {
+			cout << "Nume coloana " << i + 1 << ": " << cuvinte[k] << endl;
+			cout << "Tip coloana " << i + 1 << ": " << cuvinte[k + 1] << endl;
+			cout << "Dimensiune coloana " << i + 1 << ": " << cuvinte[k + 2] << endl;
+			cout << "Valoare implicita coloana " << i + 1 << ": " << cuvinte[k + 3] << endl;
+		}
+	}
+	void DROP_TABLE(string* cuvinte)
+	{
+		if (check_nume(cuvinte[2]) == true)
+		{
+			cout << "Stergere tabela efectuata." << endl;
+		}
+	}
+	void DISPLAY_TABLE(string* cuvinte)
+	{
+		if (check_nume(cuvinte[2]) == true)
+		{
+			cout << "Afisare tabela:" << endl;
+		}
+	}
+
+	friend ostream& operator<<(ostream&, Parsing);
+	friend istream& operator>>(istream&, Parsing&);
+};
+
+ostream& operator<<(ostream& out, Parsing p)
+{
+	out << "comanda: " << p.comanda << endl;
+	out << "numar cuvinte: " << p.nr_cuvinte << endl;
+	out << "nume tabela: " << p.nume_tabela << endl;
+	return out;
+}
+
+istream& operator>>(istream& in, Parsing& p)
+{
+	string comanda;
+	int nr_cuvinte;
+	Functie functie;
+	string nume_tabela;
+	cout << "comanda = ";
+	in >> p.comanda;
+	cout << "numar cuvinte = ";
+	in >> p.nr_cuvinte;
+	cout << "nume tabela = ";
+	in >> p.nume_tabela;
+	return in;
+}
+
+int main()
+{
+	Tabela t(nullptr, "tabela");
+	Tabela tabele[1] = { t };
+	Baza b(1, tabele, "Bazamea");
+	string comm;
+	cout << "Introduceti comanda: ";
+
+	while (comm != "exit") {
+		cin >> ws;
+		getline(cin, comm);
+		Parsing pp(comm);
+		pp.matchcom();
+		pp.set_baza(b);
+	}
+}
