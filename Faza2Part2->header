@@ -26,6 +26,9 @@ public:
 	}
 };
 
+
+
+
 class Coloana
 {
 private:
@@ -260,7 +263,7 @@ public:
 		}
 	}
 
-	void afisare_atribute(string atribut)  //Metoda de afisare a atributelor
+	void afisare_atribute(string atribut)  //metoda de afisare a atributelor
 	{
 		if (atribut == "nume_coloana") {
 			cout << "Nume coloana: " << nume_coloana << endl;
@@ -287,13 +290,13 @@ public:
 		}
 	}
 
-	void nume_majuscule() //metoda de prelucrare a atributului nume_coloana: il transforma in majuscule si il afiseaza
+	void nume_majuscule() //metoda de prelucrare a atributului nume_coloana (transforma in majuscule si il afiseaza)
 	{
 		cout << "Nume coloana initial: " << nume_coloana << endl;
 		transform(nume_coloana.begin(), nume_coloana.end(), nume_coloana.begin(), ::toupper);
 		cout << "Nume coloana cu majuscule: " << nume_coloana << endl;
 	}
-	void nume_litereMici() //metoda de prelucrare a atributului nume_coloana: il transforma in litere mici si il afiseaza
+	void nume_litereMici() //metoda de prelucrare a atributului nume_coloana (transforma in litere mici si il afiseaza)
 	{
 		cout << "Nume coloana initial: " << nume_coloana << endl;
 		transform(nume_coloana.begin(), nume_coloana.end(), nume_coloana.begin(), ::tolower);
@@ -301,8 +304,9 @@ public:
 	}
 
 	friend ostream& operator<<(ostream&, const Coloana&);
-	friend istream& operator>>(istream&, Coloana&);
+	friend istream& operator>>(istream&,  Coloana&);
 	friend ifstream& operator>>(ifstream& in, Coloana& c);
+
 };
 
 ostream& operator<<(ostream& out, const Coloana& c)
@@ -328,7 +332,7 @@ istream& operator>>(istream& in, Coloana& c)
 	in >> ws;
 	getline(in, c.tip);
 	cout << "dimensiune = ";
-	in >> ws;
+	in >> ws; 
 	in >> c.dimensiune;
 	char buffer[100];
 	cout << "valoare implicita: ";
@@ -394,10 +398,9 @@ public:
 		}
 		valori = nullptr;
 	}
-
 	Rand(int n, string* valori) //constructor cu parametri
 	{
-		if (n > 0 && valori != nullptr)
+		if (n > 0&&valori!=nullptr)
 		{
 			nr_coloane = n;
 			this->valori = new string[n];
@@ -430,7 +433,7 @@ public:
 		}
 	}
 
-	~Rand() //destructor
+	~Rand()
 	{
 		if (valori != nullptr)
 		{
@@ -518,7 +521,6 @@ public:
 			return false;
 		}
 	}
-
 	void set_valori(string* vals, int nr)
 	{
 		if (vals != nullptr && nr > 0)
@@ -535,12 +537,11 @@ public:
 			}
 		}
 	}
-
 	string* get_valori()
 	{
 		if (valori != nullptr && nr_coloane > 0)
 		{
-			string* copie = new string[nr_coloane];
+			string* copie= new string[nr_coloane];
 			for (int i = 0; i < nr_coloane; i++)
 			{
 				copie[i] = valori[i];
@@ -549,7 +550,6 @@ public:
 		}
 		return nullptr;
 	}
-
 	int getnr_coloane()
 	{
 		return nr_coloane;
@@ -596,47 +596,34 @@ public:
 		nrColoaneString = to_string(this->nr_coloane);
 		return nrColoaneString;
 	}
-
+	/*void citesteDinFisierCSV(ofstream& out) {
+		out << this->getTip() << ";";
+		out << this->getProducator() << ";";
+		out << this->getDiagonala() << ";" << this->getUmDiagonala() << ";";
+		out << this->getNrCanale() << ";";
+		for (int i = 0; i < this->getNrCanale(); i++) {
+			out << this->getCanal(i) << ";";
+		}
+		out << endl;
+	}
+	*/
 	friend ostream& operator<<(ostream&, Rand);
 	friend istream& operator>>(istream&, Rand&);
 	friend ifstream& operator>>(ifstream& in, Rand& r);
-	friend ofstream& operator<<(ofstream& out, Rand r);
 };
 
 ostream& operator<<(ostream& out, Rand r)
 {
-	//out << "Numar coloane: ";//<< r.nr_coloane << endl;
-	//out << r.nr_coloane << endl;
-	if (r.valori != nullptr)
-	{
-		//out << "Randuri: " << endl;
-		for (int i = 0; i < r.nr_coloane; i++)
-		{
-			out << r.valori[i] << " " << endl;
-		}
-		out << endl;
-
-	}
-	return out;
-}
-
-ofstream& operator<<(ofstream& out, Rand r)
-{
-	string y = to_string(r.nr_coloane);
-	const char* ux = y.c_str();
-	out << ux << endl;
-	if (r.valori != nullptr)
+	if(r.valori!=nullptr)
 	{
 		for (int i = 0; i < r.nr_coloane; i++)
 		{
-			const char* ux = r.valori[i].c_str();
-			out << ux << " " << endl;
+			out << r.valori[i] << " ";
 		}
 		out << endl;
 	}
 	return out;
 }
-
 istream& operator>>(istream& in, Rand& r)
 {
 	cout << "numar coloane = ";
@@ -674,7 +661,6 @@ ifstream& operator>>(ifstream& in, Rand& r)
 		r.valori = new string[r.nr_coloane];
 		for (int i = 0; i < r.nr_coloane; i++)
 		{
-			cout << "valori[" << i << "] = ";
 			in >> r.valori[i]; in >> ws;
 		}
 	}
@@ -780,7 +766,7 @@ public:
 			this->coloane = nullptr;
 		}
 	}
-	~Tabela() //destructor
+	~Tabela()
 	{
 		if (tabela != nullptr)
 		{
@@ -793,7 +779,7 @@ public:
 		}
 	}
 
-	Tabela& operator=(const Tabela& t) //operator=
+	Tabela& operator=(const Tabela& t)
 	{
 		if (tabela != nullptr)
 		{
@@ -970,17 +956,17 @@ public:
 			{
 				this->tabela[i] = tabela[i];
 			}
-
+			
 		}
 	}
 
-	void nume_majuscule() //metoda de prelucrare a atributului nume_tabela: transforma in majuscule si il afiseaza
+	void nume_majuscule() //metoda de prelucrare a atributului nume_tabela (transforma in majuscule si il afiseaza)
 	{
 		cout << "Nume tabela initial: " << nume_tabela << endl;
 		transform(nume_tabela.begin(), nume_tabela.end(), nume_tabela.begin(), ::toupper);
 		cout << "Nume tabela cu majuscule: " << nume_tabela << endl;
 	}
-	void nume_litereMici() //metoda de prelucrare a atributului nume_tabela: transforma in litere mici si il afiseaza
+	void nume_litereMici() //metoda de prelucrare a atributului nume_tabela (transforma in litere mici si il afiseaza)
 	{
 		cout << "Nume tabela initial: " << nume_tabela << endl;
 		transform(nume_tabela.begin(), nume_tabela.end(), nume_tabela.begin(), ::tolower);
@@ -1005,28 +991,43 @@ public:
 		cout << Tabela::nrTabele << endl;
 	}
 
+	void afisare_select()
+	{
+		cout << "Nume tabela: ";
+		cout << nume_tabela << endl;
+		if (coloane != nullptr)
+		{
+			cout << coloane[0].nume_coloana  << endl;
+		}
+		for (int i = 0; i < nr_randuri; i++)
+		{
+			cout << tabela[i];
+		}
+	}
+
 	void serializare(ofstream& f)
 	{
-		f.write((char*)&nr_randuri, sizeof(nr_randuri));		
-		f.write((char*)&tabela[0].nr_coloane, sizeof(tabela[0].nr_coloane));		
-		for (int j = 0; j < tabela[0].nr_coloane; j++)
-		{
-			int length = tabela[0].valori[j].length();
-			f.write((char*)&length, sizeof(length));	
-			length++;
-			f.write(tabela[0].valori[j].c_str(), length);
-		}
-
+		f.write((char*)&nr_randuri, sizeof(nr_randuri));		//1
+		
+			f.write((char*)&tabela[0].nr_coloane, sizeof(tabela[0].nr_coloane));		//2
+			for (int j = 0; j < tabela[0].nr_coloane; j++)
+			{
+				int length = tabela[0].valori[j].length();
+				f.write((char*)&length, sizeof(length));			//scrie marimea unei valori 2 (1,0) si valoarea 1,marimea 4 (i,0,n, 0) valoarea ion
+				length++;
+				f.write(tabela[0].valori[j].c_str(), length);
+			}
+		
 		f.write((char*)&nrC, sizeof(nrC));   //scrie nrc adica 2
 		f.write((char*)&nr_randuri, sizeof(nr_randuri));
 	}
 
-	void deserializare(ifstream& f)
+	void deserializare(ifstream& f) 
 	{
 		f.read((char*)&nr_randuri, sizeof(nr_randuri));
 		f.seekg(0, ios::beg);
-		if (tabela != nullptr)
-			delete[] tabela;
+		if(tabela!=nullptr)
+		delete[] tabela;
 		tabela = new Rand[nr_randuri];
 		for (int i = 0; i < nr_randuri; i++)
 		{
@@ -1034,8 +1035,8 @@ public:
 			//cout << "Rand " << i + 1 << endl;
 			f.read((char*)&x, sizeof(x));
 			f.read((char*)&tabela[i].nr_coloane, sizeof(tabela[i].nr_coloane));
-			if (tabela[i].valori != nullptr)
-				delete[] tabela[i].valori;
+			if(tabela[i].valori!=nullptr)
+			delete[] tabela[i].valori;
 			tabela[i].valori = new string[tabela[i].nr_coloane];
 			for (int j = 0; j < tabela[i].nr_coloane; j++)
 			{
@@ -1047,9 +1048,9 @@ public:
 				f.read(aux, length);
 				this->tabela[i].valori[j] = aux;
 				//cout << "val " << i << " " << j << " " << tabela[i].valori[j] << endl;
-				if (aux != nullptr)
-					delete[] aux;
-			}
+				if(aux!=nullptr)
+				delete[] aux;
+			}   //nr rand nr col lungimeval val nr rand
 			f.read((char*)&nrC, sizeof(nrC));
 			f.read((char*)&x, sizeof(x));
 		}
@@ -1061,14 +1062,14 @@ public:
 	friend istream& operator>>(istream&, Tabela&);
 	friend ofstream& operator<<(ofstream& out, const Tabela& t);
 	friend ifstream& operator>>(ifstream&, Tabela&);
-};
 
+};
 int Tabela::nrTabele = 0;
 
 ostream& operator<<(ostream& out, const Tabela& t)
 {
-	//out << "Nume tabela: ";
-	//out << t.nume_tabela << endl;
+	out << "Nume tabela: ";
+	out << t.nume_tabela << endl;
 	if (t.coloane != nullptr)
 	{
 		out << "Coloane: " << endl;
@@ -1078,14 +1079,14 @@ ostream& operator<<(ostream& out, const Tabela& t)
 		}
 		out << endl;
 	}
-	//out << "Numar randuri: ";
-	//out << t.nr_randuri << endl;
-	//out << "Randuri: " << endl;
+	out << "Numar randuri: ";
+	out << t.nr_randuri << endl;
+	out << "Randuri: " << endl;
 	if (t.tabela != nullptr)
 	{
 		for (int i = 0; i < t.nr_randuri; i++)
 		{
-			out << t.tabela[i] << " ";
+			out << t.tabela[i];
 		}
 		out << endl;
 	}
@@ -1186,7 +1187,7 @@ private:
 	friend class LDD;
 	friend class LMD;
 	Tabela* baza; //Baza reprezinta un vector de tabele
-	const char* nume_db = "Baza mea";
+	const char* nume_db="Baza mea";
 	int nr_tabele;
 
 public:
@@ -1355,10 +1356,8 @@ public:
 
 	const char* get_nume()
 	{
-		return this->nume_db; 
-		//nu avem nevoie de verificare dearece este mereu "Baza mea"
-		//nu avem nevoie sa returnam o copie pentru ca nume_db nu este modificabil
-	}						  
+		return this->nume_db; //nu e nevoie de verificare, fiind mereu "Baza mea"
+	}						  //si nici nevoie sa returnam o copie, pentru ca nu e modificabil
 
 	Tabela* getbaza()
 	{
@@ -1391,22 +1390,21 @@ public:
 		}
 	}
 
-	void nume_majuscule() //metoda de prelucrare a atributului nume_db: transforma in majuscule si il afiseaza
+	void nume_majuscule() //metoda de prelucrare a atributului nume_db (transforma in majuscule si il afiseaza)
 	{
 		cout << "Nume baza initial: " << nume_db << endl;
 		string name = nume_db;
 		transform(name.begin(), name.end(), name.begin(), ::toupper);
 		cout << "Nume baza cu majuscule: " << name << endl;
 	}
-
-	void nume_litereMici() //metoda de prelucrare a atributului nume_db: transforma in litere mici si il afiseaza
+	void nume_litereMici() //metoda de prelucrare a atributului nume_db (transforma in litere mici si il afiseaza)
 	{
 		cout << "Nume baza initial: " << nume_db << endl;
 		string name = nume_db;
 		transform(name.begin(), name.end(), name.begin(), ::tolower);
 		cout << "Nume baza cu litere mici: " << name << endl;
 	}
-
+	
 	friend ostream& operator<<(ostream&, Baza);
 	friend istream& operator>>(istream&, Baza&);
 };
@@ -1477,6 +1475,7 @@ public:
 	{
 		this->com = comanda;
 		this->nr_cuvinte = nr_cuvinte;
+		//this->nume_tabela = nume_tabela;
 	}
 
 	LDD(string comanda) //constructor cu parametri
@@ -1501,6 +1500,7 @@ public:
 	{
 		this->com = l.com;
 		this->nr_cuvinte = l.nr_cuvinte;
+		//this->nume_tabela = l.nume_tabela;
 	}
 
 	~LDD() //destructor
@@ -1525,16 +1525,12 @@ public:
 				flag = true;
 			}
 		}
-		string nume_fisier = expr + ".txt";  ifstream f; f.open(nume_fisier);
-		//iau numele tabelei scris in comanda si adaug txt la final
-		//pentru a vedea daca am deja un fisier asociat
-		//unei tabele cu acest nume
-		if (f.is_open())
-		{											               			
-			flag = true; //daca am gasit numele fisierului, am deja tabela			
+		string nume_fisier = expr + ".txt";  ifstream f; f.open(nume_fisier);				//iau numele tabelei scris in comanda, adaug txt la final
+		if (f.is_open()) {											               			//pentru a vedea daca am deja un fisier asociat
+			flag = true;						//daca l-am gasit, am deja tabela			//unei tabele cu acest nume
 		}
 		else {
-			cout << "Fisierul nu exista" << endl; //tabela nu exista
+			//cout << "Fisierul nu exista" << endl; //tabela nu mai exista
 			flag = false;
 		}
 		return flag;
@@ -1545,42 +1541,26 @@ public:
 		bool flag = true;
 		int nr = 0;
 
-		for (int j = 0; j < exp.length(); j++)  //parcurg expresia
-		{ 
-			if (exp[j] == '(') //daca e o paranteza deschisa
-			{
-				nr++;
-				p++; 
+		for (int j = 0; j < exp.length(); j++) { //parcurg expresia
+			if (exp[j] == '(') {
+				nr++; p++; // e o paranteza deschisa
 			}
-			else 
-			{
-				if (exp[j] == ')') //daca e o paranteza inchisa
-					nr--;   
-				if (exp[j] == ',') 
-				{
-					if (nr == 0) 
-					{ 
-						cout << "Virgula incorecta!" << endl;
-						flag = false;
-						break;
-					}
+			else {
+				if (exp[j] == ')')
+					nr--;   // e o paranteza inchisa
+				if (exp[j] == ',') {
+					if (nr == 0) { cout << "Virgula incorecta!" << endl; flag = false; break; }
 					else v++;
 				}
 			}
-			if (nr < 0) 
-			{ 
-				flag = false; 
-				break; 
-			}
+			if (nr < 0) { flag = false; break; }
 		}
-		if (nr < 0) //daca sunt mai multe paranteze inchise
-		{   
+		if (nr < 0) {   // Sunt mai multe paranteze inchise
 			flag = false;
 			cout << "Parantezele nu corespund." << endl;
 		}
-		for (int j = 0; j < exp.length() - 1; j++) 
-		{
-			if (exp[j] == ',' && exp[j + 1] == ',') //daca virgulele sunt consecutive
+		for (int j = 0; j < exp.length() - 1; j++) {
+			if (exp[j] == ',' && exp[j + 1] == ',') //virgule consecutive
 			{
 				cout << "Virgulele sunt consecutive, sintaxa gresita!" << endl;
 				flag = false;
@@ -1590,7 +1570,7 @@ public:
 		return flag;
 	}
 
-	bool structura_tabela(string* cuvinte, int c) //metoda verifica daca structura tabelei este corecta, respectiv tipul de data introdus
+	bool structura_tabela(string* cuvinte, int c)
 	{
 		bool flag = false;
 		for (int i = 0; i < c; i++)
@@ -1608,23 +1588,19 @@ public:
 			}
 			if (cuvinte[i * 4 + 4] == "integer" || cuvinte[i * 4 + 4] == "float")
 			{
-				if (stoi(cuvinte[i * 4 + 6]) != 0) 
-					return false;
-				else 
-					flag = true;
+				if (stoi(cuvinte[i * 4 + 6]) != 0) return false;
+				else flag = true;
 			}
 			else if (cuvinte[i * 4 + 4] == "text") {
-				if (regex_match(cuvinte[i * 4 + 6], text) == false) 
-					return false;
-				else 
-					flag = true;
+				if (regex_match(cuvinte[i * 4 + 6], text) == false) return false;
+				else flag = true;
 			}
 		}
 		return flag;
 	}
 
-	void set_baza(Baza b)  //la crearea bazei, o asociam obiectului de tip LDD pentru a gestiona comenzile
-	{ 
+	void set_baza(Baza b)
+	{  //la crearea bazei, o asociam obiectului de tip Parsing pentru a gestiona comenzile
 		this->b = b;
 	}
 
@@ -1632,50 +1608,49 @@ public:
 	{
 		return this->b;
 	}
-
-	void CREATE_TABLE(string* cuvinte, int k) //k ia 2 valori: 1 daca avem un create table cu o sincura coloana, 2 daca tabela are doua sau mai multe coloane
-	{		
+	void CREATE_TABLE(string* cuvinte, int k) //k e 1 sau 2: 1 daca e un create cu o singura coloana per tabel
+	{												  // 2 daca are 2 sau mai multe coloane, pentru ca abordarea e putin diferita
 		if (check_nume(cuvinte[2]) == false)  //check_name e actualizat
 		{
 			Coloana* col = nullptr; int nr = 0;
 			if (k == 1)
 			{							//tabelelor ar trebui sa fie separata de cea a datelor) (adica cand facem create nu ar trebui sa initializam randuri, alea aparand cand facem insert)
-				Coloana c(cuvinte[3], cuvinte[4], stoi(cuvinte[5]), cuvinte[6]);  //creez o coloana
+					//++b;
+				Coloana c(cuvinte[3], cuvinte[4], stoi(cuvinte[5]), cuvinte[6]);  //creez o coloana ; stoi transforma string-ul din comanda si il face int, pt ca dimensiunea trebuie sa fie numar
 				col = new Coloana[1]; //creez vector de coloane, randurile
 				nr = 1;
 				col[0] = c;
 			}
 			else if (k == 2)
 			{
-				int p = 0, v = 0, m = 3; //p=paranteze, v=virgule, m=m e folosit pentru a lua din 4 in 4 cuvintele, pentru fiecare coloana, incepand de la cuvant[3], adica al 4-lea din create table
-				delimitariCorecte(com, p, v); 
-				col = new Coloana[p - 1]; //daca numarul de perechi de paranteze este p => numarul de coloane va fi p-1
+				int p = 0, v = 0, m = 3; //aici am paranteze si virgule initializate cu 0, sa mi le numere functia urmatoare
+				delimitariCorecte(com, p, v);   //m e folosit pentru a lua din 4 in 4 cuvintele, pentru fiecare coloana, incepand de la cuvant[3], adica al 4-lea din create table
+				col = new Coloana[p - 1];  //daca am p perechi paranteze, am p-1 coloane in comanda, o pereche de paranteze fiind cea ce le cuprinde pe toate
 				nr = p - 1;
-				for (int i = 0; i < p - 1; i++) //pentru gestionarea mai multor coloane
+				for (int i = 0; i < p - 1; i++)
 				{
 					Coloana c(cuvinte[m], cuvinte[m + 1], stoi(cuvinte[m + 2]), cuvinte[m + 3]);
-					m += 4;
+					m += 4;   //ce am facut si mai sus, doar ca aici am  mai multe coloane, nu una
 					col[i] = c;
 				}
 			}
 			else throw("Nu s-a recunoscut comanda!");
-
 			if (structura_tabela(cuvinte, nr) == true)
 			{
-				Tabela x(col, nr, cuvinte[2]);  //creez tabela
-				Tabela* tabele = new Tabela[1]; //creez vector de tabele
-				tabele[0] = x; //salvez tabela
-				Baza b(1, tabele); //creez baza
+				Tabela x(col, nr, cuvinte[2]);  //creez tabela, cu vector randuri, nr randuri care cred ca ar trebui sa fie tot p-1? asa ar avea sens, acum vad sii numele e in cuvinte[2]
+				Tabela* tabele = new Tabela[1]; //am vectori de tabele
+				tabele[0] = x; //salvez tabela aici
+				Baza b(1, tabele);  //creez baza
 				set_baza(b); //asociez parsingului
-				string nume_fisier = cuvinte[2] + ".txt";  ofstream f; f.open(nume_fisier); //creez numele fisierului (nume tabela si extensie txt)
-				f << x; //scriu in fisier
-				cout << x; //afisez la consola
-				f.close();
+				b.setbaza(tabele, 1);
+				string nume_fisier = cuvinte[2] + ".txt";  ofstream f; f.open(nume_fisier); //filehandler fisier(nume,tip)
+				f << x;  //il scriu
+				cout << x; //afisez=> e ok!
+				f.close(); //NEVER FORGET TO CLOSE IT //fisier.inchi
 				delete[] tabele;
 				delete[]col;
 			}
-			else 
-			{
+			else {
 				cout << "Structura tabelei nu este corecta!" << endl;
 			}
 		}
@@ -1688,25 +1663,24 @@ public:
 	void DROP_TABLE(string* cuvinte)
 	{
 		string nume_fisier = cuvinte[2] + ".txt";  ifstream f; f.open(nume_fisier); //creez numele fisierului pe care il caut (nume tabela si extensie txt)
-		if (check_nume(cuvinte[2]) == true || f.is_open())  //verific daca gasesc fisierul 
+		if (check_nume(cuvinte[2]) == true || f.is_open())  //verific in vectorul bazei, sau daca gasesc fisierul
 		{
-			f.close();
-			if (remove(nume_fisier.c_str()) != 0) //sterg fisierul text
+			f.close(); //daca nu-l inchid aici, n am permisiune sa l sterg ulterior
+			if (remove(nume_fisier.c_str()) != 0) //sterg
 				perror("Eroare stergere fisier.");
 			else
 				puts("Stergere structura tabela efectuata.");
-			nume_fisier = cuvinte[2] + ".bin";  ifstream f; f.open(nume_fisier); //creez numele fisierului pe care il caut (nume tabela si extensie bin)
+			nume_fisier = cuvinte[2] + ".bin";  ifstream f; f.open(nume_fisier);
 			if (f.is_open())
 			{
-				f.close();
-				if (remove(nume_fisier.c_str()) != 0) //sterg fisierul binar
+				f.close(); //daca nu-l inchid aici, n am permisiune sa l sterg ulterior
+				if (remove(nume_fisier.c_str()) != 0) //sterg
 					perror("Eroare stergere fisier binar.");
 				else
 					puts("Stergere continut tabela efectuata.");
 			}
 		}
-		else 
-		{
+		else {
 			perror("Tabela nu exista.");
 		}
 		f.close();
@@ -1716,14 +1690,41 @@ public:
 		string nume_fisier = cuvinte[2] + ".txt";  ifstream f; f.open(nume_fisier);
 		if (check_nume(cuvinte[2]) == true || f.is_open())
 		{
-			cout << "Afisare tabela:" << endl;
 			Tabela t;
 			f >> t;
+			f.close();
+			string nume = nume_comanda_txt("DISPLAY_");
+			nume += ".txt";
+			const char* aux = nume.c_str();
+			ofstream out(nume);
+			streambuf* coutbuf = cout.rdbuf(); //salvare buffer
+			cout.rdbuf(out.rdbuf()); //redirectionare cout catre fisier
+			cout << "Afisare tabela:" << endl;
+			t.afisare_tabela();
+			cout.rdbuf(coutbuf); //resetare catre standard output 
+			cout << "Afisare tabela:" << endl; //afisam si la consola
 			t.afisare_tabela();
 		}
-		f.close();
+		else cout << "Tabela nu exista!" << endl;
 	}
-
+	
+	string nume_comanda_txt(string c)
+	{
+		string nume; int k = 0;
+		for (int i = 1; i < 100; i++)
+		{
+			string x = to_string(i);
+			nume = c + x;
+			if (check_nume(nume) == true)
+			{
+				x = to_string(i+1);
+				nume = c + x;
+				return nume;
+			}
+			else return nume;
+		}
+	}
+	
 	void CREATE_INDEX(string* cuvinte)
 	{
 
@@ -1775,7 +1776,7 @@ public:
 		nr_cuvinte = 0;
 	}
 
-	LMD(string co, int nr) //constructor cu parametri
+	LMD(string co,int nr) //constructor cu parametri /*, string nume_tabela*/
 	{
 		this->coma = co;
 		this->nr_cuvinte = nr;
@@ -1784,6 +1785,7 @@ public:
 
 	LMD(const LMD& m) //constructor de copiere
 	{
+		//this->parser = m.parser;
 		this->coma = m.coma;
 		this->nr_cuvinte = m.nr_cuvinte;
 	}
@@ -1800,26 +1802,8 @@ public:
 		return *this;
 	}
 
-	LMD(string coma) //constructor cu parametri
-	{
-		this->coma = coma;
-		int state = OUT;
-		unsigned wc = 0;
-		for (int i = 0; i < coma.length(); i++)
-		{
-			if (coma[i] == ' ' || coma[i] == '=')
-				state = OUT;
-			else if (state == OUT)
-			{
-				state = IN;
-				++wc;
-			}
-		}
-		this->nr_cuvinte = wc;
-	}
-
-	void set_baza(Baza b) //la crearea bazei, o asociam obiectului de tip LMD pentru a gestiona comenzile
-	{  
+	void set_baza(Baza b)
+	{  //la crearea bazei, o asociam obiectului de tip Parsing pentru a gestiona comenzile
 		this->b = b;
 	}
 
@@ -1827,7 +1811,6 @@ public:
 	{
 		return this->b;
 	}
-
 	bool check_nume(string expr)  //metoda de prelucrare a atributului baza
 	{
 		bool flag = false;
@@ -1838,16 +1821,13 @@ public:
 				flag = true;
 			}
 		}
-		string nume_fisier = expr + ".txt";  ifstream f; f.open(nume_fisier);
-		//iau numele tabelei scris in comanda si adaug txt la final
-		//pentru a vedea daca am deja un fisier asociat
-		//unei tabele cu acest nume
-		if (f.is_open()) 
-		{											            
-			flag = true; //daca am gasit numele fisierului, am deja tabela		
+		string nume_fisier = expr + ".txt";  ifstream f; f.open(nume_fisier);				//iau numele tabelei scris in comanda, adaug txt la final
+		if (f.is_open()) {											               			//pentru a vedea daca am deja un fisier asociat
+			flag = true;						//daca l-am gasit, am deja tabela			//unei tabele cu acest nume
+			f.close(); 
 		}
 		else {
-			cout << "Fisierul nu exista" << endl; //tabela nu mai exista
+			//cout << "Fisierul nu exista" << endl; //tabela nu mai exista
 			flag = false;
 		}
 		return flag;
@@ -1861,7 +1841,7 @@ public:
 			flag = true;
 		}
 		else return false;
-		for (int i = 0; i < t.nrC; i++) //pentru fiecare coloana
+		for (int i = 0; i < t.nrC; i++) //pentru fiecare coloana, 
 		{
 			if (t.coloane[i].dimensiune < cuvinte[i + 4].length())
 			{
@@ -1902,9 +1882,8 @@ public:
 		return flag;
 	}
 
-	int egalitate(string s1, string s2) 
-	{  //pentru a verifica daca o comanda primita este una din cele trei, convertesc s1 si s2 in litere mici
-		transform(s1.begin(), s1.end(), s1.begin(), ::tolower);
+	int egalitate(string s1, string s2) {  //pentru a verifica daca o comanda primita este una din cele trei
+		transform(s1.begin(), s1.end(), s1.begin(), ::tolower);   //convertesc s1 si s2 in litere mici
 		transform(s2.begin(), s2.end(), s2.begin(), ::tolower);
 		if (s1.compare(s2) == 0)
 			return 1; //la fel
@@ -1913,33 +1892,33 @@ public:
 
 	void INSERT_INTO(string* cuvinte)
 	{
-		string nume_fisier = cuvinte[2] + ".txt";  ifstream f; f.open(nume_fisier); //caut fisierul tabelei
+		string nume_fisier = cuvinte[2] + ".txt";  ifstream f; f.open(nume_fisier);  //caut fisierul tabelei
 		if (check_nume(cuvinte[2]) == true && f.is_open())
 		{
 			Tabela t; //creez tabela
-			f >> t; //pe care o citesc din fisier
+			f >> t; //pe care o citesc din fisier , cu nr randuri 1
 			int nrRanduri = t.nr_randuri;
 			f.close();
-			if (structura_corecta(t, cuvinte) == true) //verific daca structura este buna
+			if (structura_corecta(t, cuvinte) == true)  //verific daca structura e ok
 			{
-				Rand r1(t.nrC, nullptr); //creez randul pe care vreau sa-l inserez
-				Rand* rows = new Rand[1]; //si vectorul de randuri, pentru ca tabela mea are Rand* tabela
+				Rand r1(t.nrC, nullptr);  //creez randul
+				Rand* rows = new Rand[1];  //si vectorul de randuri, pentru ca tabela mea are Rand* tabela
 				string* vals = new string[t.nrC];  //un rand are valori asociate= nr coloane
 				for (int i = 0; i < t.nrC; i++)
 				{
-					vals[i] = cuvinte[i + 4]; //salvez valorile in tabela
+					vals[i] = cuvinte[i + 4];  //salvez valorile in tabela
 				}
-				r1.set_valori(vals, t.nrC); //setez valorile randului
-				rows[0] = r1;  //pun randul in vector
-				t.nr_randuri++;
-				t.setranduri(rows, t.nr_randuri); //pun randul in tabela
+				r1.set_valori(vals, t.nrC); //le setez randului
+				rows[0] = r1;  //il pun in vector
+				t.nr_randuri++; //nr_randuri=1;
+				t.setranduri(rows, t.nr_randuri);  //pun randul in tabela
 
 				ofstream scriu_text; scriu_text.open(nume_fisier, ios::out | ios::trunc);
-				scriu_text << t;
+				scriu_text << t; //scriu t aici, unde va avea nr randuri =1
 				scriu_text.close();
 
 				ofstream f(t.nume_tabela + ".bin", ios::binary | ios::out | ios::app);
-				t.serializare(f); //creez fisierul binar
+				t.serializare(f); //ii fac fisierul binar
 				f.close();
 
 				ifstream g(t.nume_tabela + ".bin", ios::binary | ios::in | ios::ate);
@@ -1947,7 +1926,7 @@ public:
 				Tabela xx; //creez o tabela dummy
 				xx.setnume_tabela(t.nume_tabela);
 				xx.deserializare(g);
-				cout << "XX este: " << endl << xx << endl;
+				cout << "Datele au fost adaugate. " << endl;
 				g.close();
 				delete[] rows;
 				delete[] vals;
@@ -1960,6 +1939,49 @@ public:
 		f.close();
 	}
 
+	string nume_comanda_txt(string c)
+	{
+		string nume; int k = 0;
+		for (int i = 1; i < 100; i++)
+		{
+			string x = to_string(i);
+			nume = c + x;
+			if (check_nume(nume) == true)
+			{
+				x = to_string(i + 1);
+				nume = c + x;
+				return nume;
+			}
+			else return nume;
+		}
+	}
+
+	void SELECTALL(string* cuvinte)
+	{
+		Tabela xx; //creez o tabela dummy
+		string nume_fisier = cuvinte[3] + ".txt";  ifstream f; f.open(nume_fisier);
+		f >> xx;
+		f.close();
+		ifstream g(cuvinte[3] + ".bin", ios::binary | ios::in | ios::ate);
+		g.seekg(-4, ios::end);
+		xx.setnume_tabela(cuvinte[3]);
+		xx.deserializare(g);
+		g.close();
+		string nume = nume_comanda_txt("SELECT_");
+		nume += ".txt";
+		const char* aux = nume.c_str();
+		ofstream out(nume);
+		streambuf* coutbuf = cout.rdbuf(); //salvare buffer
+		cout.rdbuf(out.rdbuf()); //redirectionare cout catre fisier
+		cout << "Continutul tabelei este: " << endl;
+		xx.afisare_select();
+		cout.rdbuf(coutbuf); //resetare catre standard output 
+		cout << "Continutul tabelei este: " << endl;//afisam si la consol
+		xx.afisare_select();
+	}
+
+
+	//de gestionat:
 	void SELECT_ALL(string* cuvinte)
 	{
 		//int valoare = 5;
@@ -1981,7 +2003,7 @@ public:
 			//cout << buffer;
 			cout << endl;
 			string* word = new string[100];
-			int i = 0, k = 0, vb = 0; 
+			int i = 0, k = 0, vb = 0;
 			while (i < buffer.length())
 			{
 				if (buffer[i] == ' ')
@@ -1998,12 +2020,12 @@ public:
 			cout << word[2];
 			cout << endl;
 			string columns;
-			columns.append(word[2]+' ');
-			for (i = 2; i < word[i].length()-4; i++)
+			columns.append(word[2] + ' ');
+			for (i = 2; i < word[i].length() - 4; i++)
 			{
 				cout << word[i + 4];
-				columns.append(word[i + 4]+' ');
-				
+				columns.append(word[i + 4] + ' ');
+
 			}
 			cout << endl;
 			cout << columns;
@@ -2041,11 +2063,12 @@ public:
 		}
 		//Trebuie gestionat operatorul de la linia 1071
 	}
+	
 
 	/*string* every_word()  //metoda de prelucraee a atributului comanda: imparte string-ul in vector de string-uri (pentru fiecare cuvant)
 	{
 		string* cuvinte = new string[nr_cuvinte];  //aloc vector de cuvinte regasite in comanda data
-		int i = 0, k = 0, vb = 0;  //contorul cuvintelor 
+		int i = 0, k = 0, vb = 0;  //contorul cuvintelor
 		while (i < this->coma.length())
 		{
 			if (this->coma[i] == ' ' || this->coma[i] == '=')
@@ -2201,6 +2224,10 @@ public:
 			g.close();
 		}
 	}
+
+
+
+	
 	friend ostream& operator<<(ostream&, LMD);
 	friend istream& operator>>(istream&, LMD&);
 };
@@ -2218,8 +2245,14 @@ istream& operator>>(istream& in, LMD& m)
 	in >> m.coma;
 	cout << "numar cuvinte = ";
 	in >> m.nr_cuvinte;
+	//cout << "nume tabela = ";
+	//in >> p.nume_tabela;
 	return in;
 }
+
+
+
+
 
 class Parsing
 {
@@ -2394,16 +2427,15 @@ public:
 		this->m = m;
 	}
 
-	int egalitate(string s1, string s2) {  //pentru a verifica daca o comanda primita este una din cele trei convertesc s1 si s2 in litere mici
-		transform(s1.begin(), s1.end(), s1.begin(), ::tolower);
+	int egalitate(string s1, string s2) {  //pentru a verifica daca o comanda primita este una din cele trei
+		transform(s1.begin(), s1.end(), s1.begin(), ::tolower);   //convertesc s1 si s2 in litere mici
 		transform(s2.begin(), s2.end(), s2.begin(), ::tolower);
 		if (s1.compare(s2) == 0)
 			return 1; //la fel
 		return 0; //diferite
 	}
 
-	bool matchcom() //metoda de prelucrare a atributului comanda: verifica sintaxa
-	{  
+	bool matchcom() {  //metoda de prelucrare a atributului comanda: verifica sintaxa
 		regex create1("\\s*create\\s+table\\s+\\w+\\s*\\((\\s*\\w+.?\\w*\\s*(,)){3}\\s*\\w+.?\\w*\\s*\\)\\s*", regex_constants::icase);
 		regex drop("\\s*drop\\s+table\\s+\\w+\\s*", regex_constants::icase);
 		regex display("\\s*display\\s+table\\s+\\w+\\s*", regex_constants::icase);
@@ -2414,6 +2446,7 @@ public:
 		regex delete_from("\\s*delete\\s+from\\s+\\w+\\s+where\\s+\\w+\\s*=\\s*(\\w+.?\\w*)\\s*", regex_constants::icase);
 		regex create_indx("\\s*create\\s+index\\s+(\\s*if\\s+not\\s+exists\\s+)?\\w+\\s+on\\s+\\w+\\s*\\(\\s*\\w+\\s*\\)\\s*", regex_constants::icase);
 		regex drop_indx("\\s*drop\\s+index\\s+\\w+\\s*", regex_constants::icase);
+		regex exx("exit", regex_constants::icase);
 		bool match = false;  string* cuvinte = fiecare_cuvant();
 		if (regex_match(comanda, create1))
 		{
@@ -2433,13 +2466,13 @@ public:
 		}
 		if (regex_match(comanda, insert))
 		{
-			match = true;
+			match = true; 
 			m.INSERT_INTO(cuvinte);
 		}
 		if (regex_match(comanda, select))
 		{
 			match = true;
-			m.SELECT_ALL(cuvinte);
+			m.SELECTALL(cuvinte);
 		}
 		if (regex_match(comanda, update))
 		{
@@ -2459,14 +2492,18 @@ public:
 		{
 			match = true;
 		}
+		if (regex_match(comanda, exx))
+		{
+			return true;
+		}
 		cout << (match ? "Sintaxa corecta. " : "Eroare de sintaxa!") << endl;
 		return match;
 	}
 
-	string* fiecare_cuvant()  //metoda de prelucrare a atributului comanda: imparte string-ul in vector de string-uri pentru a putea delimita cuvintele din comanda primita
+	string* fiecare_cuvant()  //metoda de prelucraee a atributului comanda: imparte string-ul in vector de string-uri (pentru fiecare cuvant)
 	{
-		string* cuvinte = new string[nr_cuvinte];
-		int i = 0, k = 0, vb = 0;
+		string* cuvinte = new string[nr_cuvinte];  //aloc vector de cuvinte regasite in comanda data
+		int i = 0, k = 0, vb = 0;  //contorul cuvintelor 
 		while (i < this->comanda.length())
 		{
 			if (this->comanda[i] == ' ' || this->comanda[i] == '=' || this->comanda[i] == ',' || this->comanda[i] == '(' || this->comanda[i] == ')')
